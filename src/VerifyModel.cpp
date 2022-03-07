@@ -401,13 +401,13 @@ void modelBatchForward(Scalar &batch_loss){
     
     initial_quat.setRPY(0,0,CppAD::Value(gt_vec[i].yaw));
     initial_quat = initial_quat.normalize();
-      
+    
     Xn[0] = initial_quat.getX();
     Xn[1] = initial_quat.getY();
     Xn[2] = initial_quat.getZ();
     Xn[3] = initial_quat.getW();
     
-        
+    
     //find initial angular vel that matches with the start time "time"
     //get rotational velocity from IMU.
     double diff;
@@ -420,11 +420,11 @@ void modelBatchForward(Scalar &batch_loss){
         imu_idx = j;
       }
     }
-      
+    
     Xn[11] = imu_vec[imu_idx].wx;
     Xn[12] = imu_vec[imu_idx].wy;
     Xn[13] = imu_vec[imu_idx].wz;
-      
+    
     Xn[14] = gt_vec[i].vx;
     Xn[15] = gt_vec[i].vy;
     Xn[16] = 0;
