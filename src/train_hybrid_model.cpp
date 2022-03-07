@@ -153,7 +153,7 @@ int main(int argc, char **argv){
   for(int i = 0; i < 20;i++){
     //  g_hybrid_model->step(1,1);
   }
-  
+
   g_hybrid_model->stop_log();
   
   //init_tests();
