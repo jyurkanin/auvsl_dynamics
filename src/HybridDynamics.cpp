@@ -222,14 +222,38 @@ void HybridDynamics::get_tire_f_ext(const Eigen::Matrix<Scalar,STATE_DIM,1> &X, 
   
   Eigen::Matrix<Scalar,TireNetwork::num_in_features,1> features;
   Eigen::Matrix<Scalar,TireNetwork::num_out_features,1> forces;
+  features[3] = bekker_params[0];
+  features[4] = bekker_params[1];
+  features[5] = bekker_params[2];
+  features[6] = bekker_params[3];
+  features[7] = bekker_params[4];
+  
+  //log_value(sinkages);
   
   for(int ii = 0; ii < 4; ii++){
+    Scalar vel_x_tan = tire_radius*X[17+ii]; //17 is the idx that tire velocities start at.
+    Scalar slip_ratio;  //longitudinal slip
+    Scalar slip_angle;  //
+    
+    const Scalar small_val = 1e-3f;
+    const Scalar literally_zero = 0;
+    
+    Scalar cpt_vx = CppAD::CondExpEq(cpt_vels[ii][0], literally_zero, small_val, cpt_vels[ii][0]); //prevent divide by zero and maintain 
+    vel_x_tan = CppAD::CondExpEq(vel_x_tan, literally_zero, small_val, vel_x_tan);
+    slip_ratio = 1.0 - (cpt_vx / vel_x_tan);
+    
+    slip_angle = CppAD::atan(cpt_vels[ii][1] / CppAD::abs(cpt_vx));
+        
     features[0] = sinkages[ii];
     features[1] = slip_ratio;
     features[2] = slip_angle;
     
     TireNetwork::forward(features, forces);
     
+    forces[0] = CppAD::CondExpGt(vel_x_tan, cpt_vels[ii][0], CppAD::abs(forces[0]), -CppAD::abs(forces[0]));
+    forces[1] = CppAD::CondExpGt(cpt_vels[ii][1], literally_zero, -CppAD::abs(forces[1]), CppAD::abs(forces[1]));
+    
+    //forces[2] = std::min(forces[2], 0); //Fz should never point up
     Eigen::Matrix<Scalar,3,1> lin_force;
     Eigen::Matrix<Scalar,3,1> ang_force;
     
@@ -245,8 +269,12 @@ void HybridDynamics::get_tire_f_ext(const Eigen::Matrix<Scalar,STATE_DIM,1> &X, 
     //So that reaction forces are oriented with the surface normal
     Eigen::Matrix<Scalar,3,1> temp_vel = cpt_rots[ii]*cpt_vels[ii];
     
-    lin_force[2] = CppAD::CondExpGt(temp_vel[2], literally_zero, lin_force[2] * .1, lin_force[2]); //hack to damp out the vertical motion.
-    
+    //ang_force = cpt_rots[ii].transpose()*ang_force;
+    lin_force[2] = CppAD::CondExpGt(temp_vel[2], literally_zero, lin_force[2] * .1, lin_force[2]);
+
+    //if(sinkages[ii] < 0)
+    //  continue;
+
     lin_force[0] = CppAD::CondExpLt(sinkages[ii], literally_zero, literally_zero, lin_force[0]);
     lin_force[1] = CppAD::CondExpLt(sinkages[ii], literally_zero, literally_zero, lin_force[1]);
     lin_force[2] = CppAD::CondExpLt(sinkages[ii], literally_zero, literally_zero, lin_force[2]);
