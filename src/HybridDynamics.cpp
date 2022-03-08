@@ -250,7 +250,7 @@ void HybridDynamics::get_tire_f_ext(const Eigen::Matrix<Scalar,STATE_DIM,1> &X, 
     
     TireNetwork::forward(features, forces);
     
-    forces[0] = CppAD::CondExpGt(vel_x_tan, cpt_vels[ii][0], CppAD::abs(forces[0]), -CppAD::abs(forces[0]));
+    forces[0] = CppAD::CondExpGt(vel_x_tan, literally_zero,        CppAD::abs(forces[0]), -CppAD::abs(forces[0]));
     forces[1] = CppAD::CondExpGt(cpt_vels[ii][1], literally_zero, -CppAD::abs(forces[1]), CppAD::abs(forces[1]));
     
     //forces[2] = std::min(forces[2], 0); //Fz should never point up
