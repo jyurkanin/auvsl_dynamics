@@ -25,12 +25,12 @@ int main(int argc, char **argv){
   ros::init(argc, argv, "auvsl_global_planner");
   ros::NodeHandle nh;
   
-  test_slopes();
+  //test_slopes();
   
-  //init_tests();
-  // test_CV3_paths();
+  init_tests();
+  test_CV3_paths();
   // //test_LD3_path();
-  // del_tests();
+  del_tests();
   
   return 0;
 }

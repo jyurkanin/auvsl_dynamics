@@ -361,7 +361,7 @@ void test_CV3_paths(){
   log_csv << "lin_err,ang_err\n";
   
   //Remember this needs to start at 1.
-  for(int jj = 55; jj <= 55; jj++){
+  for(int jj = 1; jj <= 144; jj++){
     memset(odom_fn, 0, 100);
     sprintf(odom_fn, "/home/justin/Downloads/CV3/extracted_data/odometry/%04d_odom_data.txt", jj);
     ROS_INFO("Reading Odom File %s", odom_fn);
